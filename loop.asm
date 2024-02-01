@@ -4,6 +4,9 @@ SYS_WRITE   equ 4
 STDIN       equ 0
 STDOUT      equ 1
 
+section .data
+    LF db 0xA           ;newline character
+
 section .bss
     num resb 1
 
@@ -12,7 +15,7 @@ section .text
 
 _start:
     mov byte [num],'0'  ;first number to print
-    mov ecx,10           ;loop instruction uses ECX as counter
+    mov ecx,10          ;loop instruction uses ECX as counter
 
 l1:   ;print loop
     push rcx            ;store ECX (RCX in 64-bit mode)
