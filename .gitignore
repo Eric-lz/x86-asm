@@ -1,3 +1,12 @@
 .vscode/
 
+# workaround to ignore extension-less files:
+# ignore all files and folders
+*
+# un-ignore folders
+!*/
+# un-ignore files with extension
+!*.*
+
+# ignore object files
 *.o
