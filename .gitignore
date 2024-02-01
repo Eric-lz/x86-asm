@@ -10,3 +10,6 @@
 
 # ignore object files
 *.o
+
+# ignore output executable files
+*.out
