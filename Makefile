@@ -1,22 +1,23 @@
+FORMAT = elf64
+NASM = nasm -f $(FORMAT) $<
+LD = ld $@.o -o $@.out
+
+RECIPE = $(NASM) && $(LD)
+
 hello: hello.asm
-	nasm -f elf64 $<
-	ld $@.o -o $@
+	$(RECIPE)
 
 stars: stars.asm
-	nasm -f elf64 $<
-	ld $@.o -o $@
+	$(RECIPE)
 
 input: input.asm
-	nasm -f elf64 $<
-	ld $@.o -o $@
+	$(RECIPE)
 
 add: add.asm
-	nasm -f elf64 $<
-	ld $@.o -o $@
+	$(RECIPE)
 
 loop: loop.asm
-	nasm -f elf64 $<
-	ld $@.o -o $@
+	$(RECIPE)
 
 clean:
-	rm -f *.o hello stars input add loop
+	rm -f *.o *.out
