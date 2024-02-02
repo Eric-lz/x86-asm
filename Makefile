@@ -19,5 +19,11 @@ add: add.asm
 loop: loop.asm
 	$(RECIPE)
 
+loop64: loop64.asm
+	$(RECIPE)
+
+input64: input64.asm
+	$(RECIPE)
+
 clean:
 	rm -f *.o *.out
