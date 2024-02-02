@@ -25,5 +25,8 @@ loop64: loop64.asm
 input64: input64.asm
 	$(RECIPE)
 
+integer: integer.asm
+	$(RECIPE)
+
 clean:
 	rm -f *.o *.out
