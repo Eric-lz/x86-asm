@@ -1,7 +1,7 @@
 section	.text
-   global _start    ;must be declared for linker (ld)
-	
-_start:             ;tell linker entry point
+   global _start    	;must be declared for linker (ld)
+
+_start:             	;tell linker entry point
    mov	eax,4		;system call number (sys_write)
    mov	ebx,1		;file descriptor (stdout)
    mov	ecx, stars	;message to write

@@ -1,5 +1,6 @@
-;Ask the user to enter a number
+;Ask the user to enter a number (64-bit, 19 digits) [sign optional]
 ;and convert it from text (ASCII) to decimal (integer)
+;Store the result in RAX
 
 ;syscall codes
 SYS_EXIT    equ 0x3C    ;60
@@ -9,21 +10,18 @@ STDIN       equ 0
 STDOUT      equ 1
 
 section .data
-    prompt      db 'Enter a number (6 digit max): '
+    prompt      db 'Enter a number: '
     prompt_len  equ $-prompt
+    newline	equ 0xA
 
 section .bss
-    string  resb 7      ;string buffer (6 digit limit + newline character)  '000000A'
-    integer resb 2      ;integer result after conversion
+    string  resb 24 ;string buffer (19 digit + sign + 0xA + extra)
+    integer resb 8	;result after conversion (64 bit integer)
 
 section .text
     global _start
 
 _start:
-    ;set newline after integer
-    ;that way it prints \n automatically
-    mov byte [integer+1], 0xA
-
     ;Prompt user for input
     mov rdi, STDOUT     ;file descriptor
     mov rsi, prompt     ;buffer
@@ -34,14 +32,14 @@ _start:
     ;Read and store the user input
     mov rdi, STDIN      ;file descriptor
     mov rsi, string     ;buffer
-    mov rdx, 7          ;length
+    mov rdx, 21         ;length (20 + sign)
     mov rax, SYS_READ   ;syscall
     syscall
 
     ;Convert string to integer with atoi
     mov rsi, string
     call atoi
-result:
+result: ;used in debugging
     mov [integer], rax
 
     ;Print integer in ASCII form
@@ -59,17 +57,21 @@ exit:
 
 
 ; ======================== Functions ========================
-;atoi(RSI): convert string in RSI to integer, output to RAX
+;atoi(RSI): convert string in RSI to 64-bit integer, output to RAX
 atoi:
     ;store RBX, RCX and RDX
     push rbx
     push rcx
     push rdx
 
-    ;zero RCX and RDX and set RBX to 10
+    ;zero RCX and RDX
     xor rcx, rcx
     xor rdx, rdx
-    mov rbx, 10
+
+    ;check sign
+    cmp byte [rsi], '-'  ;if first character is not a sign (+ or -)
+    jg atoi_loop    ;jump to loop
+    inc rcx         ;otherwise increment RCX
 
 atoi_loop:
     mov al, [rsi+rcx]   ;load digit
@@ -77,29 +79,35 @@ atoi_loop:
     je atoi_end         ;jump to end
     sub al, '0'         ;subtract ASCII 0 to get decimal integer
 
+    ;skip multiplication for the first digit
     cmp rcx, 0
     je atoi_skip_first
 
-multiply:   ;multiply RDX by 10
-    push rax
-    mov eax, edx
-    mul ebx
-    shl rdx, 16
-    add rdx, rax
-    pop rax
+    ;multiply RDX by 10
+    ;using shift and add
+    shl rdx, 1      ; *2
+    mov rbx, rdx    ; *2
+    shl rdx, 1      ; *4
+    shl rdx, 1      ; *8
+    add rdx, rbx    ; *10
 
 atoi_skip_first:
     add rdx, rax        ;add to what's already in RDX
+    inc rcx             ;increment counter
 
-    inc rcx
-
-    ;if RCX reaches 7, return from the function
-    cmp rcx, 7
+    ;if RCX reaches 20 (number is bigger than 64 bits),
+    ;return from the function
+    cmp rcx, 20
     je  atoi_end
 
     jmp atoi_loop
 
 atoi_end:
+    cmp byte [rsi], '-'
+    jne atoi_skip_sign
+    neg rdx
+
+atoi_skip_sign:
     mov rax, rdx
     pop rdx
     pop rcx
