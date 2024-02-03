@@ -1,5 +1,6 @@
 FORMAT = elf64
-NASM = nasm -f $(FORMAT) $<
+NASMFLAGS = -f $(FORMAT) -g
+NASM = nasm $(NASMFLAGS) $<
 LD = ld $@.o -o $@.out
 
 RECIPE = $(NASM) && $(LD)

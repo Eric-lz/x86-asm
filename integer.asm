@@ -41,6 +41,7 @@ _start:
     ;Convert string to integer with atoi
     mov rsi, string
     call atoi
+result:
     mov [integer], rax
 
     ;Print integer in ASCII form
@@ -65,44 +66,29 @@ atoi:
     push rcx
     push rdx
 
-    ;zero RCX and RDX and set RBX to 1
+    ;zero RCX and RDX and set RBX to 10
     xor rcx, rcx
     xor rdx, rdx
-    mov rbx, 1
+    mov rbx, 10
 
 atoi_loop:
     mov al, [rsi+rcx]   ;load digit
     cmp al, 0xA         ;if digit is newline character
     je atoi_end         ;jump to end
+    sub al, '0'         ;subtract ASCII 0 to get decimal integer
 
     cmp rcx, 0
     je atoi_skip_first
 
-    ;multiply RBX by 10
-    push rax    ;ASCII digit
-    push rdx    ;output
-
-    mov eax, ebx
-    mov ebx, 10
-    mul ebx
-    shl rdx, 16
-    add rdx, rax
-    mov rbx, rdx
-
-    ;multiply RDX by RBX
-    push rbx    ;base
-    pop rdx     ;output
-
+multiply:   ;multiply RDX by 10
+    push rax
     mov eax, edx
     mul ebx
     shl rdx, 16
     add rdx, rax
-
-    pop rbx     ;base
-    pop rax     ;digit
+    pop rax
 
 atoi_skip_first:
-    sub al, '0'         ;subtract ASCII 0 to get decimal integer
     add rdx, rax        ;add to what's already in RDX
 
     inc rcx
