@@ -29,5 +29,8 @@ input64: input64.asm
 atoi: atoi.asm
 	$(RECIPE)
 
+itoa: itoa.asm
+	$(RECIPE)
+
 clean:
 	rm -f *.o *.out
