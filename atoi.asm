@@ -12,7 +12,6 @@ STDOUT      equ 1
 section .data
     prompt      db 'Enter a number: '
     prompt_len  equ $-prompt
-    newline	equ 0xA
 
 section .bss
     string  resb 24 ;string buffer (19 digit + sign + 0xA + extra)
