@@ -87,8 +87,7 @@ atoi_loop:
     ;using shift and add
     shl rdx, 1      ; *2
     mov rbx, rdx    ; *2
-    shl rdx, 1      ; *4
-    shl rdx, 1      ; *8
+    shl rdx, 2      ; *8
     add rdx, rbx    ; *10
 
 atoi_skip_first:
