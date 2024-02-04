@@ -42,9 +42,11 @@ _start:
     mov [integer], rax
 
     ;Convert integer back to string
+    ;load input number in RDX
+    ;load buffer in RDI
     mov rdx, [integer]
+    mov rdi, output
     call itoa
-    mov output, rdi
 
     ;Print output string
     mov rdi, STDOUT     ;file descriptor
@@ -119,9 +121,43 @@ atoi_skip_sign:
 
 
 ;itoa(RDX): convert integer in RDX to string format, output to RDI
-itoa:
-    ;div -> RDX:RAX, quotient in RAX, remainter in RDX
-    ;make sure to zero RDX
-    ;RDX will have the last digit when divided by 10
-    ;RAX will have the rest of the number
-    ;just keep dividing RAX and storing RDX as ASCII
+itoa:    
+    ;store and set up registers
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    xor rsi, rsi        ;clear RSI to use as index for the buffer
+    xor rcx, rcx        ;clear RCX to count number of digits
+    mov rbx, 10         ;use RBX to divide by 10
+
+itoa_check_sign:
+    cmp rax, 0          ;if RAX is positive
+    jge itoa_loop       ;skip this step, otherwise
+    mov byte [rdi], '-' ;add minus sign to beginning of string
+    inc rsi             ;advance one position (due to minus sign)
+    neg rax             ;treat RAX as positive number from now on
+
+itoa_loop:
+    xor rdx, rdx        ;clear RDX (upper bits of div)
+    div rbx             ;divide RAX by 10 using RBX
+    add rdx, '0'        ;convert digit to ASCII
+    push rdx            ;save to stack to reverse the order later
+    inc rcx             ;go to next digit
+    cmp rax, 0          ;while RAX is not zero
+    jne itoa_loop       ;keep looping division
+
+itoa_end_loop:
+    pop rdx             ;get digits in reverse order
+    mov [rdi+rsi], rdx  ;save to buffer
+    inc rsi             ;use RSI as index
+    loop itoa_end_loop  ;loop for each character
+    
+    ;restore registers
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+    ret    
