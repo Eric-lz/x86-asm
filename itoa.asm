@@ -65,7 +65,7 @@ exit:
 ; ======================== Functions ========================
 ;atoi(RSI): convert string in RSI to 64-bit integer, output to RAX
 atoi:
-    ;store RBX, RCX and RDX
+    ;store registers
     push rbx
     push rcx
     push rdx
@@ -75,22 +75,23 @@ atoi:
     xor rdx, rdx
 
     ;check sign
-    cmp byte [rsi], '-'  ;if first character is not a sign (+ or -)
-    jg atoi_loop    ;jump to loop
-    inc rcx         ;otherwise increment RCX
+    cmp byte [rsi], '-' ;if first character is not a sign (+ or -)
+    jg atoi_loop        ;jump to loop
+    inc rcx             ;otherwise increment RCX
 
 atoi_loop:
     mov al, [rsi+rcx]   ;load digit
     cmp al, 0xA         ;if digit is newline character
-    je atoi_end         ;jump to end
+    je atoi_end         ;jump to end, otherwise
     sub al, '0'         ;subtract ASCII 0 to get decimal integer
 
     ;skip multiplication for the first digit
     cmp rcx, 0
     je atoi_skip_first
 
+    ;for all next digits
     ;multiply RDX by 10
-    ;using shift and add
+    ;using shift and add method
     shl rdx, 1      ; *2
     mov rbx, rdx    ; *2
     shl rdx, 2      ; *8
@@ -100,19 +101,19 @@ atoi_skip_first:
     add rdx, rax        ;add to what's already in RDX
     inc rcx             ;increment counter
 
-    ;if RCX reaches 20 (number is bigger than 64 bits),
-    ;return from the function
-    cmp rcx, 20
-    je  atoi_end
+    cmp rcx, 20         ;if RCX reaches 20 (number is bigger than 64 bits),
+    je  atoi_end        ;return from the function
 
-    jmp atoi_loop
+    jmp atoi_loop       ;jump to next digit
 
 atoi_end:
-    cmp byte [rsi], '-'
-    jne atoi_skip_sign
-    neg rdx
+    cmp byte [rsi], '-' ;if there's no minus sign
+    jne atoi_skip_sign  ;treat number as positive (duh)
+    neg rdx             ;otherwise negate the output
 
 atoi_skip_sign:
+    ;move RDX into RAX (expected return)
+    ;and restore registers
     mov rax, rdx
     pop rdx
     pop rcx
@@ -136,23 +137,23 @@ itoa_check_sign:
     cmp rax, 0          ;if RAX is positive
     jge itoa_loop       ;skip this step, otherwise
     mov byte [rdi], '-' ;add minus sign to beginning of string
-    inc rsi             ;advance one position (due to minus sign)
+    inc rsi             ;advance one position on the buffer
     neg rax             ;treat RAX as positive number from now on
 
 itoa_loop:
-    xor rdx, rdx        ;clear RDX (upper bits of div)
+    xor rdx, rdx        ;clear RDX (unused upper bits of div)
     div rbx             ;divide RAX by 10 using RBX
     add rdx, '0'        ;convert digit to ASCII
-    push rdx            ;save to stack to reverse the order later
+    push rdx            ;store in the stack to reverse the order later
     inc rcx             ;go to next digit
     cmp rax, 0          ;while RAX is not zero
     jne itoa_loop       ;keep looping division
 
-itoa_end_loop:
+itoa_end:
     pop rdx             ;get digits in reverse order
-    mov [rdi+rsi], rdx  ;save to buffer
-    inc rsi             ;use RSI as index
-    loop itoa_end_loop  ;loop for each character
+    mov [rdi+rsi], rdx  ;save them to buffer
+    inc rsi             ;using RSI as offset index
+    loop itoa_end       ;loop for each digit
     
     ;restore registers
     pop rsi
