@@ -32,5 +32,8 @@ atoi: atoi.asm
 itoa: itoa.asm
 	$(RECIPE)
 
+add_improved: add_improved.asm
+	$(RECIPE)
+
 clean:
 	rm -f *.o *.out
